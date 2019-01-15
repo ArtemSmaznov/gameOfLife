@@ -1,0 +1,92 @@
+<style>
+body{
+	background: gray;
+	}
+td{
+	height: 25px; 
+	width: 25px
+	}
+</style>
+
+<script>
+var tableWidth = 5;
+var tableHeight = 5;
+var cellColor = "green"
+
+function changeCellState(obj) {
+	if ((obj).style.background == cellColor){
+		(obj).style.background = "none"
+	}
+	else{
+		(obj).style.background = cellColor
+	}
+}
+
+
+</script>
+
+<center>
+<table border=1>
+<script>
+
+for (y = 1; y <= tableHeight; y++){
+	document.write("<tr>");
+	for (x = 1; x <= tableWidth; x++){
+		document.write("<td id='x" + x + "y" + y + "' onclick='changeCellState(this)'>" + x + ":" + y + "</td>");
+	}
+	document.write("</tr>");
+}
+
+</script>
+</table>
+<br>
+<input type="button" value="Check" onclick="checkState()">
+<p>
+<div id="result"></div>
+
+<script>
+var cellX;
+var cellY;
+var aliveNeighbours;
+
+document.getElementById("x" + cellX + "y" + cellY).style.background = cellColor;
+
+
+function checkState(){
+	aliveNeighbours = 0;
+
+	cellX = 2;
+	cellY = 2;
+	
+	if (document.getElementById("x" + (cellX - 1) + "y" + (cellY - 1)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX) + "y" + (cellY - 1)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX + 1) + "y" + (cellY - 1)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX - 1) + "y" + (cellY)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX + 1) + "y" + (cellY)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX - 1) + "y" + (cellY + 1)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX) + "y" + (cellY + 1)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX + 1) + "y" + (cellY + 1)).style.background == cellColor){aliveNeighbours++;}
+	
+	result.innerHTML = "neightbours around " + cellX + ":" + cellY + " alive: " + aliveNeighbours;
+
+
+}
+
+
+
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
