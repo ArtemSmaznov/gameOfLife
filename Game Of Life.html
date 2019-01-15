@@ -40,7 +40,7 @@ for (y = 1; y <= tableHeight; y++){
 </script>
 </table>
 <br>
-<input type="button" value="Check" onclick="checkState()">
+<input type="button" value="Check" onclick="nextCycle()">
 <p>
 <div id="result"></div>
 
@@ -49,31 +49,44 @@ var cellX;
 var cellY;
 var aliveNeighbours;
 
-document.getElementById("x" + cellX + "y" + cellY).style.background = cellColor;
 
 
-function checkState(){
+
+function checkState(cellX,cellY){
 	aliveNeighbours = 0;
 
-	cellX = 2;
-	cellY = 2;
 	
-	if (document.getElementById("x" + (cellX - 1) + "y" + (cellY - 1)).style.background == cellColor){aliveNeighbours++;}
-	if (document.getElementById("x" + (cellX) + "y" + (cellY - 1)).style.background == cellColor){aliveNeighbours++;}
-	if (document.getElementById("x" + (cellX + 1) + "y" + (cellY - 1)).style.background == cellColor){aliveNeighbours++;}
-	if (document.getElementById("x" + (cellX - 1) + "y" + (cellY)).style.background == cellColor){aliveNeighbours++;}
-	if (document.getElementById("x" + (cellX + 1) + "y" + (cellY)).style.background == cellColor){aliveNeighbours++;}
-	if (document.getElementById("x" + (cellX - 1) + "y" + (cellY + 1)).style.background == cellColor){aliveNeighbours++;}
-	if (document.getElementById("x" + (cellX) + "y" + (cellY + 1)).style.background == cellColor){aliveNeighbours++;}
-	if (document.getElementById("x" + (cellX + 1) + "y" + (cellY + 1)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX - 1) + "y" + (cellY - 1)) != null && document.getElementById("x" + (cellX - 1) + "y" + (cellY - 1)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX) + "y" + (cellY - 1)) != null && document.getElementById("x" + (cellX) + "y" + (cellY - 1)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX + 1) + "y" + (cellY - 1)) != null && document.getElementById("x" + (cellX + 1) + "y" + (cellY - 1)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX - 1) + "y" + (cellY)) != null && document.getElementById("x" + (cellX - 1) + "y" + (cellY)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX + 1) + "y" + (cellY)) != null && document.getElementById("x" + (cellX + 1) + "y" + (cellY)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX - 1) + "y" + (cellY + 1)) != null && document.getElementById("x" + (cellX - 1) + "y" + (cellY + 1)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX) + "y" + (cellY + 1)) != null && document.getElementById("x" + (cellX) + "y" + (cellY + 1)).style.background == cellColor){aliveNeighbours++;}
+	if (document.getElementById("x" + (cellX + 1) + "y" + (cellY + 1)) != null && document.getElementById("x" + (cellX + 1) + "y" + (cellY + 1)).style.background == cellColor){aliveNeighbours++;}
 	
-	result.innerHTML = "neightbours around " + cellX + ":" + cellY + " alive: " + aliveNeighbours;
-
-
+	
+	return aliveNeighbours;
 }
 
 
-
+function nextCycle(){
+	
+	for (y = 1; y <= tableHeight; y++){
+		for (x = 1; x <= tableWidth; x++){
+	
+			if (checkState(x,y) == 3){
+				document.getElementById("x" + x + "y" + y).style.background = cellColor;
+			}
+			else if (document.getElementById("x" + x + "y" + y).style.background == cellColor && checkState(x,y) == 2){
+				document.getElementById("x" + x + "y" + y).style.background = cellColor;
+			}
+			else{
+				document.getElementById("x" + x + "y" + y).style.background = "none";
+			}
+		}
+	}
+}
 
 
 </script>
