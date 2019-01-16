@@ -2,90 +2,182 @@
 body{
 	background: gray;
 	}
-td{
-	height: 25px; 
-	width: 25px
+#cellGrid{
+	text-align: center;
 	}
+td.cell{
+	height: 25px; 
+	width: 25px;
+	font-size: 8; 
+	padding: 0;
+	}
+tr.pageLayoutRow{
+	vertical-align: top;
+}
 </style>
 
 <script>
-var tableWidth = 5;
-var tableHeight = 5;
-var cellColor = "green"
+var tableWidth = 15;
+var tableHeight = 15;
+var gridSize = tableWidth * tableHeight;
+var cellColor = "green";
+var logging = false;
+var aliveNeighbours;
+var aliveNeighs;
+var timerId;
+
+var cellInfo = {id: [], alive: []};
+
 
 function changeCellState(obj) {
 	if ((obj).style.background == cellColor){
-		(obj).style.background = "none"
+		(obj).style.background = "none";
 	}
 	else{
-		(obj).style.background = cellColor
+		(obj).style.background = cellColor;
 	}
 }
 
 
 </script>
 
-<center>
-<table border=1>
-<script>
+<table border=0 cellspacing=0 cellpadding=0 width="100%" height="100%">
+	<tr class="pageLayoutRow">
+		<td>
+			<input type=button value="Clear" onclick="clearGrid()">
+		</td>
+		<td align="center">
+			<table border=1 cellspacing=0 cellpadding=0 id="cellGrid">
+				<script>
+				initiateGrid();
 
-for (y = 1; y <= tableHeight; y++){
-	document.write("<tr>");
-	for (x = 1; x <= tableWidth; x++){
-		document.write("<td id='x" + x + "y" + y + "' onclick='changeCellState(this)'>" + x + ":" + y + "</td>");
-	}
-	document.write("</tr>");
-}
+				function initiateGrid(){
+					for (y = 0; y < tableHeight; y++){
+						document.write("<tr>");
+						cellInfo.id.push([]);
+						cellInfo.alive.push([]);
+						for (x = 0; x < tableWidth; x++){
+							if (logging){
+								document.write("<td class='cell' id='cell_" + x + "_" + y + "' onclick='changeCellState(this)'>" + x + ":" + y + "</td>");
+							}
+							else{
+								document.write("<td class='cell' id='cell_" + x + "_" + y + "' onclick='changeCellState(this)'></td>");
+							}
+							cellInfo.id[y][x] = "cell_" + x + "_" + y;
+							cellInfo.alive[y][x] = false;
+						}
+						document.write("</tr>");
+					}
+				}
+				</script>
 
-</script>
+			</table><br>
+			
+			<input type="button" value="Step" onclick="readCells()">
+			<input type="button" value="Start" onclick="startRunning(this)"><p>
+			
+			<div id="result"></div>
+		</td>
+	</tr>
 </table>
-<br>
-<input type="button" value="Check" onclick="nextCycle()">
-<p>
-<div id="result"></div>
-
 <script>
-var cellX;
-var cellY;
-var aliveNeighbours;
 
-
-
-
-function checkState(cellX,cellY){
-	aliveNeighbours = 0;
-
-	
-	if (document.getElementById("x" + (cellX - 1) + "y" + (cellY - 1)) != null && document.getElementById("x" + (cellX - 1) + "y" + (cellY - 1)).style.background == cellColor){aliveNeighbours++;}
-	if (document.getElementById("x" + (cellX) + "y" + (cellY - 1)) != null && document.getElementById("x" + (cellX) + "y" + (cellY - 1)).style.background == cellColor){aliveNeighbours++;}
-	if (document.getElementById("x" + (cellX + 1) + "y" + (cellY - 1)) != null && document.getElementById("x" + (cellX + 1) + "y" + (cellY - 1)).style.background == cellColor){aliveNeighbours++;}
-	if (document.getElementById("x" + (cellX - 1) + "y" + (cellY)) != null && document.getElementById("x" + (cellX - 1) + "y" + (cellY)).style.background == cellColor){aliveNeighbours++;}
-	if (document.getElementById("x" + (cellX + 1) + "y" + (cellY)) != null && document.getElementById("x" + (cellX + 1) + "y" + (cellY)).style.background == cellColor){aliveNeighbours++;}
-	if (document.getElementById("x" + (cellX - 1) + "y" + (cellY + 1)) != null && document.getElementById("x" + (cellX - 1) + "y" + (cellY + 1)).style.background == cellColor){aliveNeighbours++;}
-	if (document.getElementById("x" + (cellX) + "y" + (cellY + 1)) != null && document.getElementById("x" + (cellX) + "y" + (cellY + 1)).style.background == cellColor){aliveNeighbours++;}
-	if (document.getElementById("x" + (cellX + 1) + "y" + (cellY + 1)) != null && document.getElementById("x" + (cellX + 1) + "y" + (cellY + 1)).style.background == cellColor){aliveNeighbours++;}
-	
-	
-	return aliveNeighbours;
+function startRunning(obj){
+	if ((obj).value == "Start"){
+		timerId = setInterval(() => readCells(), 200);
+		(obj).value = "Stop";
+	}
+	else{
+		clearInterval(timerId);
+		(obj).value = "Start";
+	}
 }
 
+function readCells(){
 
-function nextCycle(){
-	
-	for (y = 1; y <= tableHeight; y++){
-		for (x = 1; x <= tableWidth; x++){
-	
-			if (checkState(x,y) == 3){
-				document.getElementById("x" + x + "y" + y).style.background = cellColor;
-			}
-			else if (document.getElementById("x" + x + "y" + y).style.background == cellColor && checkState(x,y) == 2){
-				document.getElementById("x" + x + "y" + y).style.background = cellColor;
+	for (y = 0; y < tableHeight; y++){
+		for (x = 0; x < tableWidth; x++){
+			if (document.getElementById(cellInfo.id[y][x]).style.background == cellColor){
+				cellInfo.alive[y][x] = true;
 			}
 			else{
-				document.getElementById("x" + x + "y" + y).style.background = "none";
+				cellInfo.alive[y][x] = false;
 			}
 		}
 	}
+	nextCycle();
+}
+
+function checkNeighbours(y,x){
+	aliveNeighbours = 0;
+
+	
+	if (y >= 1 && x >= 1 && cellInfo.alive[y-1][x-1] == true){
+		aliveNeighbours++;
+		if (logging){console.log(x + ":" + y + " - " + (x-1) + ":" + (y-1) + " is alive");}
+		}
+	if (y >= 1 && cellInfo.alive[y-1][x] == true){
+		aliveNeighbours++;
+		if (logging){console.log(x + ":" + y + " - " + (x) + ":" + (y-1) + " is alive");}
+		}
+	if (y >= 1 && x < tableWidth-1 && cellInfo.alive[y-1][x+1] == true){
+		aliveNeighbours++;
+		if (logging){console.log(x + ":" + y + " - " + (x+1) + ":" + (y-1) + " is alive");}
+		}
+	if (x >= 1 && cellInfo.alive[y][x-1] == true){aliveNeighbours++;
+		if (logging){console.log(x + ":" + y + " - " + (x-1) + ":" + (y) + " is alive");}
+		}
+	if (x < tableWidth-1 && cellInfo.alive[y][x+1] == true){
+		aliveNeighbours++;
+		if (logging){console.log(x + ":" + y + " - " + (x+1) + ":" + (y) + " is alive");}
+		}
+	if (y < tableHeight-1 && x >= 1 && cellInfo.alive[y+1][x-1] == true){
+		aliveNeighbours++;
+		if (logging){console.log(x + ":" + y + " - " + (x-1) + ":" + (y+1) + " is alive");}
+		}
+	if (y < tableHeight-1 && cellInfo.alive[y+1][x] == true){
+		aliveNeighbours++;
+		if (logging){console.log(x + ":" + y + " - " + (x) + ":" + (y+1) + " is alive");}
+		}
+	if (y < tableHeight-1 && x < tableWidth-1 && cellInfo.alive[y+1][x+1] == true){
+		aliveNeighbours++;
+		if (logging == true){console.log(x + ":" + y + " - " + (x+1) + ":" + (y+1) + " is alive");}
+		}
+	
+	if (logging){console.log(x + ":" + y + " has alive neighbours: " + aliveNeighbours);}
+		return aliveNeighbours;
+}
+
+function nextCycle(){
+
+	for (y = 0; y < tableHeight; y++){
+		for (x = 0; x < tableWidth; x++){
+
+			aliveNeighs = checkNeighbours(y,x);
+			if (aliveNeighs == 3){
+				document.getElementById(cellInfo.id[y][x]).style.background = cellColor;
+			}
+			else if (cellInfo.alive[y][x] == true && aliveNeighs == 2){
+				document.getElementById(cellInfo.id[y][x]).style.background = cellColor;
+			}
+			else{
+				document.getElementById(cellInfo.id[y][x]).style.background = "none";
+				
+			}
+			
+		}
+	}
+}
+	
+function clearGrid(){
+
+	for (y = 0; y < tableHeight; y++){
+		for (x = 0; x < tableWidth; x++){
+			cellInfo.alive[y][x] = false;
+		}
+	}
+	nextCycle();
+		
 }
 
 
