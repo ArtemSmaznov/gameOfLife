@@ -1,6 +1,6 @@
 <style>
 body{
-	background: gray;
+	background: #555753;
 	}
 #cellGrid{
 	text-align: center;
@@ -14,17 +14,20 @@ td.cell{
 tr.pageLayoutRow{
 	vertical-align: top;
 }
+#cellGrid{
+	background: gray;
+}
 </style>
 
 <script>
 var tableWidth = 15;
 var tableHeight = 15;
-var gridSize = tableWidth * tableHeight;
 var cellColor = "green";
 var logging = false;
-var aliveNeighbours;
-var aliveNeighs;
-var timerId;
+var speed;
+
+var aliveNeighbours, aliveNeighs, timerId;
+var gridSize = tableWidth * tableHeight;
 
 var cellInfo = {id: [], alive: []};
 
@@ -44,13 +47,17 @@ function changeCellState(obj) {
 <table border=0 cellspacing=0 cellpadding=0 width="100%" height="100%">
 	<tr class="pageLayoutRow">
 		<td>
+			<!--<input type="checkbox" onclick="debugMode(this)">Debug Mode-->	
+			<p>	
+			<input type=button value="Randomise" onclick="randomizeGrid()">
 			<input type=button value="Clear" onclick="clearGrid()">
+			<p>
+			
 		</td>
 		<td align="center">
 			<table border=1 cellspacing=0 cellpadding=0 id="cellGrid">
 				<script>
 				initiateGrid();
-
 				function initiateGrid(){
 					for (y = 0; y < tableHeight; y++){
 						document.write("<tr>");
@@ -76,6 +83,7 @@ function changeCellState(obj) {
 			<input type="button" value="Step" onclick="readCells()">
 			<input type="button" value="Start" onclick="startRunning(this)"><p>
 			
+			<input type="range" min=50 max=500 id="speedSlider" value="400"><br>Speed
 			<div id="result"></div>
 		</td>
 	</tr>
@@ -84,12 +92,14 @@ function changeCellState(obj) {
 
 function startRunning(obj){
 	if ((obj).value == "Start"){
-		timerId = setInterval(() => readCells(), 200);
+		timerId = setInterval(() => readCells(), changeSpeed());
 		(obj).value = "Stop";
+//		speedSlider.disabled = true;
 	}
 	else{
 		clearInterval(timerId);
 		(obj).value = "Start";
+//		speedSlider.disabled = false;
 	}
 }
 
@@ -176,11 +186,55 @@ function clearGrid(){
 			cellInfo.alive[y][x] = false;
 		}
 	}
-	nextCycle();
-		
+	writeToGrid();
 }
 
+function randomizeGrid(){
+var varianceT = 0, varianceF = 0;
 
+	for (y = 0; y < tableHeight; y++){
+		for (x = 0; x < tableWidth; x++){
+			if (Math.floor(Math.random() * 2) == 1){
+				cellInfo.alive[y][x] = true;
+				varianceT++;
+			}
+			else if (Math.floor(Math.random() * 2) == 2){
+				alert("Random number turned out to be 2! Check function randomizeGrid()");
+			}
+			else{
+				cellInfo.alive[y][x] = false;
+				varianceF++;
+			}			
+		}
+	}
+	if (logging){console.log("Ratio of Alive cells after randomisation: " + Math.round(varianceT/(varianceT + varianceF)*100) + "%");}
+	writeToGrid();
+}
+
+function writeToGrid(){
+	for (y = 0; y < tableHeight; y++){
+		for (x = 0; x < tableWidth; x++){
+			if (cellInfo.alive[y][x] == true){
+				document.getElementById(cellInfo.id[y][x]).style.background = cellColor;
+			}
+			else{
+				document.getElementById(cellInfo.id[y][x]).style.background = "none";
+			}
+		}
+	}
+}
+
+function debugMode(obj){
+	console.log((obj).checked);
+}
+
+function changeSpeed(){
+	speed = 550 - speedSlider.value;
+	console.log(speed);
+	return speed;
+	
+	
+}
 </script>
 
 
