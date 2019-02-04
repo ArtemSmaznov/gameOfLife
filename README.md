@@ -11,4 +11,3 @@ if a cell has less than 2 alive neightbours it dies
 
 if a cell has more than 3 alive neightbours it dies
 
-Create the stage and watch it eveolve
