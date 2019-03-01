@@ -1,0 +1,265 @@
+<style>
+body{
+	background: #555753;
+	}
+#cellGrid{
+	text-align: center;
+	}
+td.cell{
+	font-size: 8; 
+	padding: 0;
+	}
+tr.pageLayoutRow{
+	vertical-align: top;
+}
+#cellGrid{
+	background: gray;
+}
+</style>
+
+<script>
+var tableWidth = 15;
+var tableHeight = 15;
+var cellSize = 20;
+
+var cellColor = "green";
+var logging = false;
+var speed;
+
+var aliveNeighbours, aliveNeighs, timerId;
+var gridSize = tableWidth * tableHeight;
+
+var cellInfo = {id: [], alive: []};
+
+
+function changeCellState(obj) {
+	if ((obj).style.background == cellColor){
+		(obj).style.background = "none";
+	}
+	else{
+		(obj).style.background = cellColor;
+	}
+}
+
+function resizeGrid(){
+	cellSize = (mainCell.clientHeight-100)/tableHeight;
+}
+
+
+</script>
+
+<body>
+
+<table border=1 cellspacing=0 cellpadding=0 width="100%" height="100%">
+	<tr class="pageLayoutRow">
+		<td>
+			<!--<input type="checkbox" onclick="debugMode(this)">Debug Mode-->	
+			<p>	
+			<input type=button value="Randomise" onclick="randomizeGrid()">
+			<input type=button value="Clear" onclick="clearGrid()">
+			<p>
+			
+		</td>
+		<td align="center" id="mainCell" height="100%">
+			<table border=1 cellspacing=0 cellpadding=0 id="cellGrid">
+				<script>
+				initiateGrid();
+				
+				function initiateGrid(){
+				resizeGrid();
+					for (y = 0; y < tableHeight; y++){
+						document.write("<tr>");
+						cellInfo.id.push([]);
+						cellInfo.alive.push([]);
+						for (x = 0; x < tableWidth; x++){
+							if (logging){
+								document.write("<td class='cell' id='cell_" + x + "_" + y + "' onclick='changeCellState(this)'>" + x + ":" + y + "</td>");
+							}
+							else{
+								document.write("<td class='cell' width='" + cellSize + "px' height='" + cellSize + "px' id='cell_" + x + "_" + y + "' onclick='changeCellState(this)'></td>");
+							}
+							cellInfo.id[y][x] = "cell_" + x + "_" + y;
+							cellInfo.alive[y][x] = false;
+						}
+						document.write("</tr>");
+					}
+				}
+				</script>
+			</table>
+		</td>
+	</tr>
+	<tr class="pageLayoutRow">
+		<td></td>
+		<td align="center" height="85px">			
+			<input type="button" value="Step" onclick="readCells()">
+			<input type="button" value="Start" onclick="startRunning(this)"><p>
+			
+			<input type="range" min=50 max=500 id="speedSlider" value="400"><br>Speed
+			<div id="result"></div>
+		</td>
+	</tr>
+</table>
+
+
+<script>
+
+
+function startRunning(obj){
+	if ((obj).value == "Start"){
+		timerId = setInterval(() => readCells(), changeSpeed());
+		(obj).value = "Stop";
+//		speedSlider.disabled = true;
+	}
+	else{
+		clearInterval(timerId);
+		(obj).value = "Start";
+//		speedSlider.disabled = false;
+	}
+}
+
+function readCells(){
+
+	for (y = 0; y < tableHeight; y++){
+		for (x = 0; x < tableWidth; x++){
+			if (document.getElementById(cellInfo.id[y][x]).style.background == cellColor){
+				cellInfo.alive[y][x] = true;
+			}
+			else{
+				cellInfo.alive[y][x] = false;
+			}
+		}
+	}
+	nextCycle();
+}
+
+function checkNeighbours(y,x){
+	aliveNeighbours = 0;
+
+	
+	if (y >= 1 && x >= 1 && cellInfo.alive[y-1][x-1] == true){
+		aliveNeighbours++;
+		if (logging){console.log(x + ":" + y + " - " + (x-1) + ":" + (y-1) + " is alive");}
+		}
+	if (y >= 1 && cellInfo.alive[y-1][x] == true){
+		aliveNeighbours++;
+		if (logging){console.log(x + ":" + y + " - " + (x) + ":" + (y-1) + " is alive");}
+		}
+	if (y >= 1 && x < tableWidth-1 && cellInfo.alive[y-1][x+1] == true){
+		aliveNeighbours++;
+		if (logging){console.log(x + ":" + y + " - " + (x+1) + ":" + (y-1) + " is alive");}
+		}
+	if (x >= 1 && cellInfo.alive[y][x-1] == true){aliveNeighbours++;
+		if (logging){console.log(x + ":" + y + " - " + (x-1) + ":" + (y) + " is alive");}
+		}
+	if (x < tableWidth-1 && cellInfo.alive[y][x+1] == true){
+		aliveNeighbours++;
+		if (logging){console.log(x + ":" + y + " - " + (x+1) + ":" + (y) + " is alive");}
+		}
+	if (y < tableHeight-1 && x >= 1 && cellInfo.alive[y+1][x-1] == true){
+		aliveNeighbours++;
+		if (logging){console.log(x + ":" + y + " - " + (x-1) + ":" + (y+1) + " is alive");}
+		}
+	if (y < tableHeight-1 && cellInfo.alive[y+1][x] == true){
+		aliveNeighbours++;
+		if (logging){console.log(x + ":" + y + " - " + (x) + ":" + (y+1) + " is alive");}
+		}
+	if (y < tableHeight-1 && x < tableWidth-1 && cellInfo.alive[y+1][x+1] == true){
+		aliveNeighbours++;
+		if (logging == true){console.log(x + ":" + y + " - " + (x+1) + ":" + (y+1) + " is alive");}
+		}
+	
+	if (logging){console.log(x + ":" + y + " has alive neighbours: " + aliveNeighbours);}
+		return aliveNeighbours;
+}
+
+function nextCycle(){
+
+	for (y = 0; y < tableHeight; y++){
+		for (x = 0; x < tableWidth; x++){
+
+			aliveNeighs = checkNeighbours(y,x);
+			if (aliveNeighs == 3){
+				document.getElementById(cellInfo.id[y][x]).style.background = cellColor;
+			}
+			else if (cellInfo.alive[y][x] == true && aliveNeighs == 2){
+				document.getElementById(cellInfo.id[y][x]).style.background = cellColor;
+			}
+			else{
+				document.getElementById(cellInfo.id[y][x]).style.background = "none";
+				
+			}
+			
+		}
+	}
+}
+	
+function clearGrid(){
+
+	for (y = 0; y < tableHeight; y++){
+		for (x = 0; x < tableWidth; x++){
+			cellInfo.alive[y][x] = false;
+		}
+	}
+	writeToGrid();
+}
+
+function randomizeGrid(){
+var varianceT = 0, varianceF = 0;
+
+	for (y = 0; y < tableHeight; y++){
+		for (x = 0; x < tableWidth; x++){
+			if (Math.floor(Math.random() * 2) == 1){
+				cellInfo.alive[y][x] = true;
+				varianceT++;
+			}
+			else if (Math.floor(Math.random() * 2) == 2){
+				alert("Random number turned out to be 2! Check function randomizeGrid()");
+			}
+			else{
+				cellInfo.alive[y][x] = false;
+				varianceF++;
+			}			
+		}
+	}
+	if (logging){console.log("Ratio of Alive cells after randomisation: " + Math.round(varianceT/(varianceT + varianceF)*100) + "%");}
+	writeToGrid();
+}
+
+function writeToGrid(){
+	for (y = 0; y < tableHeight; y++){
+		for (x = 0; x < tableWidth; x++){
+			if (cellInfo.alive[y][x] == true){
+				document.getElementById(cellInfo.id[y][x]).style.background = cellColor;
+			}
+			else{
+				document.getElementById(cellInfo.id[y][x]).style.background = "none";
+			}
+		}
+	}
+}
+
+function debugMode(obj){
+	console.log((obj).checked);
+}
+
+function changeSpeed(){
+	speed = 550 - speedSlider.value;
+	console.log(speed);
+	return speed;
+	
+	
+}
+</script>
+
+
+
+
+</body>
+
+
+
+
+
+
+
+
